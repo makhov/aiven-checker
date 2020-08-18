@@ -6,7 +6,7 @@ produces metrics about this and passes these events through an Aiven Kafka insta
 into an Aiven PostgreSQL database (well, through any Kafka instance into any PostgreSQL database, really)
 
 aiven-checker consists of two parts:
-- `checker` does checks and produces results to Kafka
+- `checker` performs checks and produces results to Kafka
 - `writer` consumes Kafka topic and writes the check result into a PostgreSQL
 
 CI/CD pipeline is on GitHub Actions: https://github.com/makhov/aiven-checker/actions
