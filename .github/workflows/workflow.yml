@@ -1,0 +1,82 @@
+name: Test & Build
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - master
+  pull_request:
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.29
+  tests_unit:
+    name: unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: run tests
+        run: ./scripts/run_test.sh unit
+  tests_int:
+    name: integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: run tests
+        run: ./scripts/run_test.sh int
+  tests_e2e:
+    name: e2e tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: run tests
+        env:
+          DATABASE_DSN: "host=postgres password=superpassword user=postgres database=postgres"
+          KAFKA_BROKERS: "kafka:9092"
+        run: ./scripts/run_test.sh e2e
+  tests_e2e_aiven:
+    name: e2e tests with aiven cloud services
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: prepare cert
+        env:
+          KAFKA_CERT: ${{ secrets.KAFKA_CERT }}
+          KAFKA_KEY: ${{ secrets.KAFKA_KEY }}
+          KAFKA_CA: ${{ secrets.KAFKA_CA }}
+        run: |
+          echo "${KAFKA_CERT}" | base64 --decode > cert
+          echo "${KAFKA_KEY}" | base64 --decode > key
+          echo "${KAFKA_CA}" | base64 --decode > ca
+      - name: run tests
+        env:
+          DATABASE_DSN: ${{ secrets.AIVEN_DATABASE_DSN }}
+          KAFKA_BROKERS: ${{ secrets.AIVEN_KAFKA_BROKERS }}
+          CERT_FILE: /app/cert
+          KEY_FILE: /app/key
+          CA_FILE: /app/ca
+        run: |
+          ./scripts/run_test.sh e2e -e CERT_FILE -e KEY_FILE -e CA_FILE
+  push_to_registry:
+    name: build image
+    needs:
+      - tests_unit
+      - tests_int
+      - tests_e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: push to gitHub packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: makhov/aiven-checker/ac
+          tag_with_ref: true

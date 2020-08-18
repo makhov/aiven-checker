@@ -1,0 +1,6 @@
+run:
+  timeout: 1m
+
+  skip-dirs-use-default: true
+  modules-download-mode: vendor
+  tests: false

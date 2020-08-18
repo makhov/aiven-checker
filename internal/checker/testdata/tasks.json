@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "url": "http://httpbin.org/status/200",
+      "period": "5s"
+    },
+    {
+      "url": "http://httpbin.org/status/404",
+      "period": "5s"
+    },
+    {
+      "url": "http://httpbin.org/html",
+      "period": "5s",
+      "regexp": "Moby.*Dick"
+    },
+    {
+      "url": "http://httpbin.org/html",
+      "period": "5s",
+      "regexp": "non-existent-pattern"
+    }
+  ]
+}
