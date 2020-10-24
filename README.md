@@ -80,5 +80,4 @@ $ make test-e2e
 
 # Migrations
 
-aiven-checker uses [goose](https://github.com/pressly/goose) for migrations.
-If `MIGRATIONS_DIR` is declared, migrations will be applied when the `writer` starts. 
+aiven-checker uses [goose](https://github.com/pressly/goose) for migrations. If `MIGRATIONS_DIR` is declared, migrations will be applied when the `writer` starts. 
